@@ -37,7 +37,7 @@ if df is not None:
             result = df[df['tin'] == clean_tin]
             
             if not result.empty:
-                st.success("✅ অভিনন্দন! আপনার টিআইএন অডিট তালিকায় পাওয়া গেছে।")
+                st.success("❌ দুঃখিত, আপনার টিআইএন অডিট তালিকায় পাওয়া গেছে।")
                 res = result.iloc[0]
                 
                 # তথ্যগুলো কার্ড আকারে দেখানো
@@ -52,7 +52,7 @@ if df is not None:
                     st.info(f"**সার্কেল:**\n{res['circle']}")
                     st.info(f"**কর বর্ষ:**\n{res['assessment_year']}")
             else:
-                st.error("❌ দুঃখিত, এই TIN নম্বরটি অডিট তালিকায় পাওয়া যায়নি।")
+                st.error(" ✅ অভিনন্দন!এই TIN নম্বরটি অডিট তালিকায় পাওয়া যায়নি।")
         else:
             st.warning("অনুগ্রহ করে একটি TIN নম্বর টাইপ করুন।")
 else:
