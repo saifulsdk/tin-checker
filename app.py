@@ -7,7 +7,7 @@ st.set_page_config(page_title="Audit Selection Checker", layout="centered")
 
 st.title("🔍 অডিট সিলেকশন চেক করুন (২০২৩-২৪)")
 
-# ফাইলের নাম
+# আপনার ফাইলের নাম
 FILE_NAME = 'audit_data.xlsx'
 
 @st.cache_data
@@ -15,7 +15,6 @@ def load_data():
     if os.path.exists(FILE_NAME):
         try:
             # Excel ফাইল পড়ার জন্য engine='openpyxl' ব্যবহার করা হয়েছে
-            # এবং 'tin' কলামকে string হিসেবে পড়া হচ্ছে যাতে ফরম্যাট ঠিক থাকে
             data = pd.read_excel(FILE_NAME, dtype={'tin': str}, engine='openpyxl')
             return data
         except Exception as e:
@@ -32,15 +31,16 @@ if df is not None:
     if st.button("সার্চ করুন"):
         if tin_input:
             clean_tin = tin_input.strip()
-            # ডাটাফ্রেমে সার্চ করা হচ্ছে
-            # নিশ্চিত করা হচ্ছে কলামের নাম 'tin' ছোট হাতের কি না (আপনার ফাইল অনুযায়ী)
+            # ডাটাফ্রেমে সার্চ
             result = df[df['tin'] == clean_tin]
             
             if not result.empty:
-                st.success("আপনার টিআইএন অডিট তালিকায় পাওয়া গেছে। ")
+                # আপনার সংশোধিত মেসেজটি এখানে যুক্ত করা হয়েছে
+                st.error("⚠️ আপনার টিআইএন অডিট তালিকায় পাওয়া গেছে। অতি স্বত্বর আপনার একজন কর আইনজীবী বা স্থানীয় কর কমিশনার অফিসে যোগাযোগ করুন।")
+                
                 res = result.iloc[0]
                 
-                # তথ্যগুলো কার্ড আকারে দেখানো
+                # তথ্যগুলো কার্ড আকারে প্রদর্শন
                 st.markdown("---")
                 st.subheader("📋 অডিট ডিটেইলস:")
                 
@@ -52,10 +52,10 @@ if df is not None:
                     st.info(f"**সার্কেল:**\n{res['circle']}")
                     st.info(f"**কর বর্ষ:**\n{res['assessment_year']}")
             else:
-                st.error(" ✅ অভিনন্দন!এই TIN নম্বরটি অডিট তালিকায় পাওয়া যায়নি।")
+                # তালিকায় না থাকলে এই মেসেজটি দেখাবে
+                st.success("✅ এই TIN নম্বরটি অডিট তালিকায় পাওয়া যায়নি।")
         else:
             st.warning("অনুগ্রহ করে একটি TIN নম্বর টাইপ করুন।")
 else:
-    st.error(f"'{FILE_NAME}' ফাইলটি খুঁজে পাওয়া যায়নি।")
-    st.info("আপনার GitHub রিপোজিটরিতে 'audit_data.xlsx' ফাইলটি আপলোড করা হয়েছে কি না নিশ্চিত করুন।")
-st.error("❗ **সতর্কবার্তা:** আপনার টিআইএন অডিট তালিকায় পাওয়া গেছে। অতি স্বত্বর আপনার একজন কর আইনজীবী বা স্থানীয় কর কমিশনার অফিসে যোগাযোগ করুন।")
+    st.error(f"'{FILE_NAME}' ফাইলটি পাওয়া যায়নি।")
+    st.info("আপনার GitHub-এ 'audit_data.xlsx' ফাইলটি আপলোড করা হয়েছে কি না নিশ্চিত করুন।")
