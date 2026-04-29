@@ -1,38 +1,45 @@
 import streamlit as st
 import pandas as pd
 
-# ওয়েবসাইটের টাইটেল এবং কনফিগারেশন
-st.set_page_config(page_title="TIN Data Audit Tool", layout="wide")
-st.title("🔍 TIN Data Lookup System")
+st.set_page_config(page_title="NBRAudit - TIN Search Tool", layout="wide")
 
-# ডাটা লোড করার ফাংশন
+st.title("🔍 TIN Data Audit & Search")
+st.write("Search the Taxpayer Identification Number database.")
+
 @st.cache_data
 def load_data():
-    # আপনার আপলোড করা ফাইলের নাম এখানে নিশ্চিত করুন
-    df = pd.read_csv("tin_data.csv")
-    return df
+    file_path = "tin_data.csv"
+    try:
+        # Attempt to load as CSV with fallback encoding
+        return pd.read_csv(file_path, encoding='utf-8')
+    except UnicodeDecodeError:
+        return pd.read_csv(file_path, encoding='latin1')
+    except Exception:
+        # If it's actually an Excel file renamed to .csv
+        return pd.read_excel(file_path)
 
+# Load the data
 try:
     df = load_data()
+    
+    # Search Bars
+    col1, col2 = st.columns(2)
+    with col1:
+        search_tin = st.text_input("Search by TIN Number")
+    with col2:
+        search_name = st.text_input("Search by Name")
 
-    # সার্চ বার তৈরি
-    search_term = st.text_input("TIN নম্বর বা নাম দিয়ে সার্চ করুন:", "")
+    # Filter Logic
+    filtered_df = df.copy()
+    if search_tin:
+        filtered_df = filtered_df[filtered_df.iloc[:, 0].astype(str).str.contains(search_tin, case=False)]
+    if search_name:
+        filtered_df = filtered_df[filtered_df.iloc[:, 1].astype(str).str.contains(search_name, case=False)]
 
-    if search_term:
-        # ডাটা সার্চ লজিক (সবগুলো কলামে সার্চ করবে)
-        results = df[df.apply(lambda row: row.astype(str).str.contains(search_term, case=False).any(), axis=1)]
-        
-        if not results.empty:
-            st.success(f"{len(results)}টি তথ্য পাওয়া গেছে।")
-            st.dataframe(results, use_container_width=True)
-        else:
-            st.warning("কোনো তথ্য খুঁজে পাওয়া যায়নি।")
-    else:
-        st.info("সার্চ করার জন্য উপরে বক্স-এ লিখুন।")
-        # প্রথম কিছু ডাটা প্রদর্শন
-        st.write("ডেটা প্রিভিউ:")
-        st.secondary_data = df.head(10)
-        st.table(st.secondary_data)
+    # Display Results
+    st.subheader(f"Results ({len(filtered_df)} found)")
+    st.dataframe(filtered_df, use_container_width=True)
 
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(f"Could not load data. The file 'tin_data.csv' might be corrupted or in a binary format. Error: {e}")
+    st.info("Tip: Try opening the file in Excel and 'Saving As' a proper CSV (Comma Delimited) file.")
